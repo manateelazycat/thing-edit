@@ -86,6 +86,9 @@
 ;; thing-paste-paragrap            paste paragraph around cursor.
 ;; thing-copy-paragrap             copy paragraph around cursor.
 ;;
+;; thing-paste-parentheses         paste parentheses around cursor.
+;; thing-copy-parentheses          copy parentheses around cursor.
+;;
 
 ;;; Installation:
 ;;
