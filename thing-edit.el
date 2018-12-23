@@ -5,8 +5,8 @@
 ;; Copyright (C) 2008, 2009, Andy Stewart, all rights reserved.
 ;; Copyright (C) 2014, Arthur Miller <arthur.miller@live.com>, all rights reserved.
 ;; Created: 2008-06-08 00:42:07
-;; Version: 1.3
-;; Last-Updated: 2018-12-22 12:48:56
+;; Version: 1.4
+;; Last-Updated: 2018-12-23 12:10:40
 ;; URL: http://www.emacswiki.org/emacs/download/thing-edit.el
 ;; Keywords: thingatpt, edit
 ;; Compatibility: GNU Emacs 23.0.60.1
@@ -186,11 +186,11 @@ Optional argument KILL-CONDITIONAL default is do copy handle, if KILL-CONDITIONA
   (interactive)
   (if kill-conditional
       (progn
-        (if thing-edit-show-message-p
-            (message "%s cutd." (buffer-substring object-beg object-end)))
+        (when thing-edit-show-message-p
+          (message "%s cutd." (buffer-substring object-beg object-end)))
         (kill-region object-beg object-end))
-    (if thing-edit-show-message-p
-        (message "%s copied." (buffer-substring object-beg object-end)))
+    (when thing-edit-show-message-p
+      (message "%s copied." (buffer-substring object-beg object-end)))
     (kill-ring-save object-beg object-end)))
 
 (defun thing-edit (thing &optional kill-conditional)
@@ -207,10 +207,9 @@ otherwise copy object."
 Argument OBJECT-BEG the begin position that object.
 Argument OBJECT-END the end position of object."
   (interactive)
-  (progn
-    (goto-char object-beg)
-    (delete-char (- object-end object-beg))
-    (yank)))
+  (goto-char object-beg)
+  (delete-char (- object-end object-beg))
+  (yank))
 
 (defun thing-replace (thing)
   "This function is a simple interface for `thing-replace-internal'"
@@ -229,9 +228,7 @@ Argument OBJECT-END the end position of object."
   "Copy sexp at current point.
 With the universal argument, the text will also be killed."
   (interactive "P")
-  (if kill-conditional
-      (thing-edit 'sexp t)
-    (thing-edit 'sexp)))
+  (thing-edit 'sexp kill-conditional))
 
 ;;;###autoload
 (defun thing-replace-sexp ()
@@ -250,9 +247,7 @@ With the universal argument, the text will also be killed."
   "Copy email at current point.
 With the universal argument, the text will also be killed"
   (interactive "P")
-  (if kill-conditional
-      (thing-edit 'email t)
-    (thing-edit 'email)))
+  (thing-edit 'email kill-conditional))
 
 ;;;###autoload
 (defun thing-replace-email ()
@@ -271,9 +266,7 @@ With the universal argument, the text will also be killed"
   "Copy filename at current point.
 With the universal argument, the text will also be killed"
   (interactive "P")
-  (if kill-conditional
-      (thing-edit 'filename t)
-    (thing-edit 'filename)))
+  (thing-edit 'filename kill-conditional))
 
 ;;;###autoload
 (defun thing-replace-filename ()
@@ -292,9 +285,7 @@ With the universal argument, the text will also be killed"
   "Copy url at current point.
 With the universal argument, the text will also be killed"
   (interactive "P")
-  (if kill-conditional
-      (thing-edit 'url t)
-    (thing-edit 'url)))
+  (thing-edit 'url kill-conditional))
 
 ;;;###autoload
 (defun thing-replace-url ()
@@ -313,9 +304,7 @@ With the universal argument, the text will also be killed"
   "Copy words at point.
 With the universal argument, the text will also be killed"
   (interactive "P")
-  (if kill-conditional
-      (thing-edit 'word t)
-    (thing-edit 'word)))
+  (thing-edit 'word kill-conditional))
 
 ;;;###autoload
 (defun thing-replace-word ()
@@ -334,9 +323,7 @@ With the universal argument, the text will also be killed"
   "Copy symbol around point.
  With the universal argument, the text will also be killed"
   (interactive "P")
-  (if kill-conditional
-      (thing-edit 'symbol t)
-    (thing-edit 'symbol)))
+  (thing-edit 'symbol kill-conditional))
 
 ;;;###autoload
 (defun thing-replace-symbol ()
@@ -355,9 +342,7 @@ With the universal argument, the text will also be killed"
   "Copy current line into Kill-Ring without mark the line.
  With the universal argument, the text will also be killed"
   (interactive "P")
-  (if kill-conditional
-      (thing-edit 'line t)
-    (thing-edit 'line)))
+  (thing-edit 'line kill-conditional))
 
 ;;;###autoload
 (defun thing-replace-line ()
@@ -370,9 +355,7 @@ With the universal argument, the text will also be killed"
   "Copy current paragraph around the point.
 With the universal argument, the text will also be killed"
   (interactive "P")
-  (if kill-conditional
-      (thing-edit 'paragraph t)
-    (thing-edit 'paragraph)))
+  (thing-edit 'paragraph kill-conditional))
 
 ;;;###autoload
 (defun thing-replace-paragraph ()
@@ -384,8 +367,7 @@ With the universal argument, the text will also be killed"
 (defun thing-cut-paragraph (&optional kill-conditional)
   "Cut current paragraph around the point"
   (interactive)
-  (thing-edit 'paragraph t)
-  )
+  (thing-edit 'paragraph t))
 
 ;;;###autoload
 (defun thing-cut-defun ()
@@ -398,9 +380,7 @@ With the universal argument, the text will also be killed"
   "Cut function around point.
  With the universal argument, the text will also be killed"
   (interactive "P")
-  (if kill-conditional
-      (thing-edit 'defun t)
-    (thing-edit 'defun)))
+  (thing-edit 'defun kill-conditional))
 
 ;;;###autoload
 (defun thing-replace-defun ()
@@ -419,9 +399,7 @@ With the universal argument, the text will also be killed"
   "Cut list around point.
  With the universal argument, the text will also be killed"
   (interactive "P")
-  (if kill-conditional
-      (thing-edit 'list t)
-    (thing-edit 'list)))
+  (thing-edit 'list kill-conditional))
 
 ;;;###autoload
 (defun thing-replace-list ()
@@ -440,9 +418,7 @@ With the universal argument, the text will also be killed"
   "Cut sentence around point.
  With the universal argument, the text will also be killed"
   (interactive "P")
-  (if kill-conditional
-      (thing-edit 'sentence t)
-    (thing-edit 'sentence)))
+  (thing-edit 'sentence kill-conditional))
 
 ;;;###autoload
 (defun thing-replace-sentence ()
@@ -461,9 +437,7 @@ With the universal argument, the text will also be killed"
   "Cut whitespace around point.
  With the universal argument, the text will also be killed"
   (interactive "P")
-  (if kill-conditional
-      (thing-edit 'whitespace t)
-    (thing-edit 'whitespace)))
+  (thing-edit 'whitespace kill-conditional))
 
 ;;;###autoload
 (defun thing-replace-whitespace ()
@@ -482,9 +456,7 @@ With the universal argument, the text will also be killed"
   "Cut page around point.
  With the universal argument, the text will also be killed"
   (interactive "P")
-  (if kill-conditional
-      (thing-edit 'page t)
-    (thing-edit 'page)))
+  (thing-edit 'page kill-conditional))
 
 ;;;###autoload
 (defun thing-replace-page ()
