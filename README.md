@@ -1,3 +1,5 @@
+<img src="./thing-edit.gif">
+
 # What is thing-edit ?
 This package is some useful functions that base on `thingatpt.el'.
 Those function can copy or cut special data object quickly and don't need to move cursor.
