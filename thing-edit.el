@@ -5,8 +5,8 @@
 ;; Copyright (C) 2008, 2009, Andy Stewart, all rights reserved.
 ;; Copyright (C) 2014, Arthur Miller <arthur.miller@live.com>, all rights reserved.
 ;; Created: 2008-06-08 00:42:07
-;; Version: 1.5
-;; Last-Updated: 2018-12-23 12:22:23
+;; Version: 1.6
+;; Last-Updated: 2018-12-23 12:42:44
 ;; URL: http://www.emacswiki.org/emacs/download/thing-edit.el
 ;; Keywords: thingatpt, edit
 ;; Compatibility: GNU Emacs 23.0.60.1
@@ -119,6 +119,7 @@
 ;;
 ;; 2018/12/23
 ;;      * Simplified code format.
+;;      * Range highlighting reminder when copying operation.
 ;;
 ;; 2018/12/22
 ;;      * Add docs.
@@ -181,6 +182,23 @@ Default is nil."
   :type 'boolean
   :group 'thing-edit)
 
+(defcustom thing-edit-flash-line-delay .3
+  "How many seconds to flash `thing-edit-font-lock-flash' after navigation.
+
+Setting this to nil or 0 will turn off the indicator."
+  :type 'number
+  :group 'thing-edit)
+
+(defface thing-edit-font-lock-action
+  '((t (:foreground "Gold" :bold t)))
+  "Face for action"
+  :group 'thing-edit)
+
+(defface thing-edit-font-lock-flash
+  '((t (:inherit highlight)))
+  "Face to flash the current line."
+  :group 'thing-edit)
+
 (defun thing-edit-internal (object-beg object-end &optional kill-conditional)
   "A fast edit complexes object.
 Argument OBJECT-BEG the begin position that object.
@@ -189,11 +207,17 @@ Optional argument KILL-CONDITIONAL default is do copy handle, if KILL-CONDITIONA
   (interactive)
   (cond (kill-conditional
          (when thing-edit-show-message-p
-           (message "Cut [ %s ]" (buffer-substring object-beg object-end)))
+           (message "%s [ %s ]"
+                    (propertize "Cut" 'face 'thing-edit-font-lock-action)
+                    (buffer-substring object-beg object-end)))
          (kill-region object-beg object-end))
         (t
          (when thing-edit-show-message-p
-           (message "Copy [ %s ]" (buffer-substring object-beg object-end)))
+           (message "%s [ %s ]"
+                    (propertize "Copy" 'face 'thing-edit-font-lock-action)
+                    (buffer-substring object-beg object-end)))
+         ;; Flash before real copy operation.
+         (thing-edit-flash-line object-beg object-end)
          (kill-ring-save object-beg object-end))))
 
 (defun thing-edit (thing &optional kill-conditional)
@@ -605,6 +629,46 @@ This assumes that `thing-edit-in-string-p' has already returned true, i.e.
   (let ((point (point)))
     (beginning-of-defun)
     (parse-partial-sexp (point) point)))
+
+(defun thing-edit-flash-line (&optional pos end-pos face delay)
+  "Flash a temporary highlight to help the user find something.
+
+POS is optional, and defaults to the current point.
+
+If optional END-POS is set, flash the characters between the two
+points, otherwise flash the entire line in which POS is found.
+
+The flash is normally not inclusive of END-POS.  However, when
+POS is equal to END-POS, the single character at POS will flash.
+
+Optional FACE defaults to `thing-edit-font-lock-flash'.  Optional DELAY
+defaults to `thing-edit-flash-line-delay' seconds.  Setting DELAY to 0 makes
+this function a no-op."
+  (callf or pos (point))
+  (unless end-pos
+    (save-excursion
+      (let ((inhibit-point-motion-hooks t))
+        (goto-char pos)
+        (beginning-of-visual-line)
+        (setq pos (point))
+        (end-of-visual-line)
+        (setq end-pos (1+ (point))))))
+  (when (eq pos end-pos)
+    (incf end-pos))
+  (callf or delay thing-edit-flash-line-delay)
+  (callf or face 'thing-edit-font-lock-flash)
+  (when (and (numberp delay)
+             (> delay 0))
+    (when (timerp next-error-highlight-timer)
+      (cancel-timer next-error-highlight-timer))
+    (setq compilation-highlight-overlay (or compilation-highlight-overlay
+                                            (make-overlay (point-min) (point-min))))
+    (overlay-put compilation-highlight-overlay 'face face)
+    (overlay-put compilation-highlight-overlay 'priority 10000)
+    (move-overlay compilation-highlight-overlay pos end-pos)
+    (add-hook 'pre-command-hook 'compilation-goto-locus-delete-o)
+    (setq next-error-highlight-timer
+          (run-at-time delay nil 'compilation-goto-locus-delete-o))))
 
 (provide 'thing-edit)
 
