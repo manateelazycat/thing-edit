@@ -5,8 +5,8 @@
 ;; Copyright (C) 2008, 2009, Andy Stewart, all rights reserved.
 ;; Copyright (C) 2014, Arthur Miller <arthur.miller@live.com>, all rights reserved.
 ;; Created: 2008-06-08 00:42:07
-;; Version: 1.4
-;; Last-Updated: 2018-12-23 12:10:40
+;; Version: 1.5
+;; Last-Updated: 2018-12-23 12:22:23
 ;; URL: http://www.emacswiki.org/emacs/download/thing-edit.el
 ;; Keywords: thingatpt, edit
 ;; Compatibility: GNU Emacs 23.0.60.1
@@ -117,6 +117,9 @@
 
 ;;; Change log:
 ;;
+;; 2018/12/23
+;;      * Simplified code format.
+;;
 ;; 2018/12/22
 ;;      * Add docs.
 ;;
@@ -184,14 +187,14 @@ Argument OBJECT-BEG the begin position that object.
 Argument OBJECT-END the end position of object.
 Optional argument KILL-CONDITIONAL default is do copy handle, if KILL-CONDITIONAL is non-nil do cut handle."
   (interactive)
-  (if kill-conditional
-      (progn
-        (when thing-edit-show-message-p
-          (message "%s cutd." (buffer-substring object-beg object-end)))
-        (kill-region object-beg object-end))
-    (when thing-edit-show-message-p
-      (message "%s copied." (buffer-substring object-beg object-end)))
-    (kill-ring-save object-beg object-end)))
+  (cond (kill-conditional
+         (when thing-edit-show-message-p
+           (message "Cut [ %s ]" (buffer-substring object-beg object-end)))
+         (kill-region object-beg object-end))
+        (t
+         (when thing-edit-show-message-p
+           (message "Copy [ %s ]" (buffer-substring object-beg object-end)))
+         (kill-ring-save object-beg object-end))))
 
 (defun thing-edit (thing &optional kill-conditional)
   "This function is a simple interface for `thing-edit-internal'.
