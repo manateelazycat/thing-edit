@@ -5,8 +5,8 @@
 ;; Copyright (C) 2008, 2009, Andy Stewart, all rights reserved.
 ;; Copyright (C) 2014, Arthur Miller <arthur.miller@live.com>, all rights reserved.
 ;; Created: 2008-06-08 00:42:07
-;; Version: 1.6
-;; Last-Updated: 2018-12-23 12:42:44
+;; Version: 1.7
+;; Last-Updated: 2018-12-27 22:01:38
 ;; URL: http://www.emacswiki.org/emacs/download/thing-edit.el
 ;; Keywords: thingatpt, edit
 ;; Compatibility: GNU Emacs 23.0.60.1
@@ -119,6 +119,7 @@
 ;;
 ;; 2018/12/27
 ;;      * Use `pulse-momentary-highlight-region' instead `thing-edit-flash-line'.
+;;      * Fix `comment-copy' not found.
 ;;
 ;; 2018/12/23
 ;;      * Simplified code format.
@@ -559,8 +560,26 @@ otherwise copy object."
         (if (comment-search-forward end t)
             (if kill-conditional
                 (call-interactively 'comment-kill)
-              (call-interactively 'comment-copy))
+              (call-interactively 'thing-comment-copy))
           (goto-char end))))))
+
+(defun thing-comment-copy (arg)
+  "Copy the first comment on this line, if any.
+With prefix ARG, copy comments on that many lines starting with this one."
+  (interactive "P")
+  (comment-normalize-vars)
+  (dotimes (_ (prefix-numeric-value arg))
+    (save-excursion
+      (beginning-of-line)
+      (let ((cs (comment-search-forward (line-end-position) t)))
+        (when cs
+          (goto-char cs)
+          (skip-syntax-backward " ")
+          (setq cs (point))
+          (comment-forward)
+          (kill-ring-save cs (if (bolp) (1- (point)) (point)))
+          (indent-according-to-mode))))
+    (if arg (forward-line 1))))
 
 (defun thing-cut-parentheses ()
   "Cut content in match parentheses."
