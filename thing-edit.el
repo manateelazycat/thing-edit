@@ -5,8 +5,8 @@
 ;; Copyright (C) 2008, 2009, Andy Stewart, all rights reserved.
 ;; Copyright (C) 2014, Arthur Miller <arthur.miller@live.com>, all rights reserved.
 ;; Created: 2008-06-08 00:42:07
-;; Version: 1.7
-;; Last-Updated: 2018-12-27 22:01:38
+;; Version: 1.8
+;; Last-Updated: 2018-12-27 22:12:59
 ;; URL: http://www.emacswiki.org/emacs/download/thing-edit.el
 ;; Keywords: thingatpt, edit
 ;; Compatibility: GNU Emacs 23.0.60.1
@@ -86,6 +86,10 @@
 ;; thing-copy-line                   copy current line.
 ;; thing-replace-line                replace current line with content of kill-ring.
 ;;
+;; thing-cut-region-or-line          cut current region or line.
+;; thing-copy-region-or-line         copy current region or line.
+;; thing-replace-region-or-line      replace current region or line with content of kill-ring.
+;;
 ;; thing-cut-to-line-end             cut string to end of line.
 ;; thing-copy-to-line-end            copy string to end of line.
 ;; thing-replace-to-line-end         replace string to end of line with content of kill-ring.
@@ -120,6 +124,7 @@
 ;; 2018/12/27
 ;;      * Use `pulse-momentary-highlight-region' instead `thing-edit-flash-line'.
 ;;      * Fix `comment-copy' not found.
+;;      * Add `thing-*-region-or-line' functions.
 ;;
 ;; 2018/12/23
 ;;      * Simplified code format.
@@ -653,6 +658,31 @@ This assumes that `thing-edit-in-string-p' has already returned true, i.e.
   (let ((point (point)))
     (beginning-of-defun)
     (parse-partial-sexp (point) point)))
+
+(defun thing-copy-region-or-line (&optional kill-conditional)
+  "Copy content of the current region or line.
+If `KILL-CONDITIONAL' is non-nil, kill object,
+otherwise copy object."
+  (interactive)
+  (save-excursion
+    (let* ((active (region-active-p))
+           (pos (or (and active (region-beginning))
+                    (line-beginning-position)))
+           (pos-end (or (and active (region-end))
+                        (line-end-position))))
+      (thing-edit-internal pos pos-end kill-conditional))))
+
+(defun thing-cut-region-or-line ()
+  "Cut content of the current region or line."
+  (interactive)
+  (thing-copy-region-or-line t))
+
+(defun thing-replace-region-or-line ()
+  "Replace the current region or line with the content."
+  (interactive)
+  (if (region-active-p)
+      (thing-replace 'region)
+    (thing-replace 'line)))
 
 (provide 'thing-edit)
 
