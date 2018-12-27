@@ -90,3 +90,8 @@ Bind your favorite key to functions:
 | thing-copy-parentheses          | copy parentheses around cursor.                                    |
 | thing-replace-parentheses       | replace parentheses around cursor with content of kill-ring.       |
 |                                 |                                                                    |
+| thing-cut-whole-buffer          | cut whole buffer                                                   |
+| thing-copy-whole-buffer         | copy whole buffer                                                  |
+| thing-replace-whole-buffer      | replace whole buffer with content of kill-ring.                    |
+|                                 |                                                                    |
+

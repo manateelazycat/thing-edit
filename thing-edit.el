@@ -5,8 +5,8 @@
 ;; Copyright (C) 2008, 2009, Andy Stewart, all rights reserved.
 ;; Copyright (C) 2014, Arthur Miller <arthur.miller@live.com>, all rights reserved.
 ;; Created: 2008-06-08 00:42:07
-;; Version: 1.8
-;; Last-Updated: 2018-12-27 22:12:59
+;; Version: 1.9
+;; Last-Updated: 2018-12-27 23:04:46
 ;; URL: http://www.emacswiki.org/emacs/download/thing-edit.el
 ;; Keywords: thingatpt, edit
 ;; Compatibility: GNU Emacs 23.0.60.1
@@ -110,6 +110,10 @@
 ;; thing-copy-parentheses            copy parentheses around cursor.
 ;; thing-replace-parentheses         replace parentheses around cursor with content of kill-ring.
 ;;
+;; thing-cut-whole-buffer            cut whole buffer
+;; thing-copy-whole-buffer           copy whole buffer
+;; thing-replace-whole-buffer        replace whole buffer with content of kill-ring.
+;;
 
 ;;; Installation:
 ;;
@@ -125,6 +129,7 @@
 ;;      * Use `pulse-momentary-highlight-region' instead `thing-edit-flash-line'.
 ;;      * Fix `comment-copy' not found.
 ;;      * Add `thing-*-region-or-line' functions.
+;;      * Add `thing-*-whole-buffer' functions.
 ;;
 ;; 2018/12/23
 ;;      * Simplified code format.
@@ -683,6 +688,24 @@ otherwise copy object."
   (if (region-active-p)
       (thing-replace 'region)
     (thing-replace 'line)))
+
+(defun thing-copy-whole-buffer (&optional kill-conditional)
+  "Copy content of the current buffer.
+If `KILL-CONDITIONAL' is non-nil, kill object,
+otherwise copy object."
+  (interactive)
+  (save-excursion
+    (thing-edit-internal (point-min) (point-max) kill-conditional)))
+
+(defun thing-cut-whole-buffer ()
+  "Cut content of the current buffer."
+  (interactive)
+  (thing-copy-whole-buffer t))
+
+(defun thing-replace-whole-buffer ()
+  "Replace the current buffer with the content."
+  (interactive)
+  (thing-replace 'buffer))
 
 (provide 'thing-edit)
 
