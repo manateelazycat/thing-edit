@@ -5,8 +5,8 @@
 ;; Copyright (C) 2008, 2009, Andy Stewart, all rights reserved.
 ;; Copyright (C) 2014, Arthur Miller <arthur.miller@live.com>, all rights reserved.
 ;; Created: 2008-06-08 00:42:07
-;; Version: 1.9
-;; Last-Updated: 2018-12-27 23:04:46
+;; Version: 2.0
+;; Last-Updated: 2018-12-28 23:18:35
 ;; URL: http://www.emacswiki.org/emacs/download/thing-edit.el
 ;; Keywords: thingatpt, edit
 ;; Compatibility: GNU Emacs 23.0.60.1
@@ -110,6 +110,10 @@
 ;; thing-copy-parentheses            copy parentheses around cursor.
 ;; thing-replace-parentheses         replace parentheses around cursor with content of kill-ring.
 ;;
+;; thing-cut-number                  cut number around cursor.
+;; thing-copy-number                 copy number around cursor.
+;; thing-replace-number              replace number around cursor with content of kill-ring.
+;;
 ;; thing-cut-whole-buffer            cut whole buffer
 ;; thing-copy-whole-buffer           copy whole buffer
 ;; thing-replace-whole-buffer        replace whole buffer with content of kill-ring.
@@ -124,6 +128,9 @@
 ;; No more need
 
 ;;; Change log:
+;;
+;; 2018/12/28
+;;      * Add `thing-*-number' functions.
 ;;
 ;; 2018/12/27
 ;;      * Use `pulse-momentary-highlight-region' instead `thing-edit-flash-line'.
@@ -590,6 +597,34 @@ With prefix ARG, copy comments on that many lines starting with this one."
           (kill-ring-save cs (if (bolp) (1- (point)) (point)))
           (indent-according-to-mode))))
     (if arg (forward-line 1))))
+
+;;;###autoload
+(defun thing-cut-number ()
+  "Cut number at point."
+  (interactive)
+  (thing-copy-number t))
+
+;;;###autoload
+(defun thing-copy-number (kill-conditional)
+  "Copy number at point.
+With the universal argument, the text will also be killed"
+  (interactive "P")
+  (save-excursion
+    (when (thing-at-point-looking-at "-?[0-9]+\\.?[0-9]*" 500)
+      (thing-edit-internal
+       (match-beginning 0)
+       (match-end 0)
+       kill-conditional))))
+
+;;;###autoload
+(defun thing-replace-number ()
+  "Replace number at point with kill ring."
+  (interactive)
+  (save-excursion
+    (when (thing-at-point-looking-at "-?[0-9]+\\.?[0-9]*" 500)
+      (thing-replace-internal
+       (match-beginning 0)
+       (match-end 0)))))
 
 (defun thing-cut-parentheses ()
   "Cut content in match parentheses."
