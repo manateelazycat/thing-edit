@@ -721,7 +721,13 @@ otherwise copy object."
   "Replace the current region or line with the content."
   (interactive)
   (if (region-active-p)
-      (thing-replace 'region)
+      (save-excursion
+        (let*((active (region-active-p))
+              (pos (or (and active (region-beginning))
+                       (line-beginning-position)))
+              (pos-end (or (and active (region-end))
+                           (line-end-position))))
+          (thing-replace-internal pos pos-end)))
     (thing-replace 'line)))
 
 (defun thing-copy-whole-buffer (&optional kill-conditional)
