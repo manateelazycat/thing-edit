@@ -5,8 +5,8 @@
 ;; Copyright (C) 2008, 2009, Andy Stewart, all rights reserved.
 ;; Copyright (C) 2014, Arthur Miller <arthur.miller@live.com>, all rights reserved.
 ;; Created: 2008-06-08 00:42:07
-;; Version: 2.0
-;; Last-Updated: 2018-12-28 23:18:35
+;; Version: 2.1
+;; Last-Updated: 2020-04-26 10:04:48
 ;; URL: http://www.emacswiki.org/emacs/download/thing-edit.el
 ;; Keywords: thingatpt, edit
 ;; Compatibility: GNU Emacs 23.0.60.1
@@ -128,6 +128,9 @@
 ;; No more need
 
 ;;; Change log:
+;;
+;; 2020/14/26
+;;      * Fix `thing-replace-region-or-line' no region here error
 ;;
 ;; 2018/12/28
 ;;      * Add `thing-*-number' functions.
@@ -720,9 +723,13 @@ otherwise copy object."
 (defun thing-replace-region-or-line ()
   "Replace the current region or line with the content."
   (interactive)
-  (if (region-active-p)
-      (thing-replace 'region)
-    (thing-replace 'line)))
+  (save-excursion
+    (let* ((active (region-active-p))
+           (pos (or (and active (region-beginning))
+                    (line-beginning-position)))
+           (pos-end (or (and active (region-end))
+                        (line-end-position))))
+      (thing-replace-internal pos pos-end))))
 
 (defun thing-copy-whole-buffer (&optional kill-conditional)
   "Copy content of the current buffer.
