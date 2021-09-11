@@ -293,20 +293,26 @@ With the universal argument, the text will also be killed."
 (defun thing-cut-email ()
   "Cut email at current point."
   (interactive)
-  (thing-edit 'email t))
+  (save-excursion
+    (backward-sexp)     ;make sure `thing-at-point-email-regexp' works
+    (thing-edit 'email t)))
 
 ;;;###autoload
 (defun thing-copy-email (kill-conditional)
   "Copy email at current point.
 With the universal argument, the text will also be killed"
   (interactive "P")
-  (thing-edit 'email kill-conditional))
+  (save-excursion
+    (backward-sexp)     ;make sure `thing-at-point-email-regexp' works
+    (thing-edit 'email kill-conditional)))
 
 ;;;###autoload
 (defun thing-replace-email ()
   "Replace email at current point with the content kill ring."
   (interactive)
-  (thing-replace 'email))
+  (save-excursion
+    (backward-sexp)     ;make sure `thing-at-point-email-regexp' works
+    (thing-replace 'email)))
 
 ;;;###autoload
 (defun thing-cut-filename ()
