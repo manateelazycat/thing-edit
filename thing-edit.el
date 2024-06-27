@@ -640,6 +640,20 @@ With the universal argument, the text will also be killed"
   (interactive)
   (thing-copy-parentheses t))
 
+(defun thing-edit-get-string-node-bound ()
+  (let* ((node (treesit-node-at (point)))
+         (node-type (treesit-node-type node))
+         (node-start (treesit-node-start node))
+         (node-end (treesit-node-end node)))
+    (pcase node-type
+      ("string_content" (cons node-start node-end))
+      ("string_start" (progn
+                        (goto-char node-end)
+                        (thing-edit-get-string-node-bound)))
+      ("string_end" (progn
+                      (goto-char (1- node-start))
+                      (thing-edit-get-string-node-bound))))))
+
 (defun thing-copy-parentheses (kill-conditional)
   "Copy content in match parentheses.
 If `KILL-CONDITIONAL' is non-nil, kill object,
@@ -647,10 +661,16 @@ otherwise copy object."
   (interactive "P")
   (save-excursion
     (if (thing-edit-in-string-p)
-        (thing-edit-internal
-         (1+ (car (thing-edit-string-start+end-points)))
-         (cdr (thing-edit-string-start+end-points))
-         kill-conditional)
+        (let ((string-node-bound (thing-edit-get-string-node-bound)))
+          (if string-node-bound
+              (thing-edit-internal
+               (car string-node-bound)
+               (cdr string-node-bound)
+               kill-conditional)
+            (thing-edit-internal
+             (1+ (car (thing-edit-string-start+end-points)))
+             (cdr (thing-edit-string-start+end-points))
+             kill-conditional)))
       (thing-edit-internal
        (progn
          (backward-up-list)
